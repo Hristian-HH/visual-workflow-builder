@@ -250,6 +250,15 @@ export default function App() {
             ↺ Reset
           </button>
           <button
+            onClick={() => {
+              const payload = JSON.stringify({ name: workflowName, nodes, edges }, null, 2);
+              const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+              Object.assign(document.createElement('a'), {
+                href: url,
+                download: `${workflowName.replace(/\s+/g, '_')}.json`,
+              }).click();
+              URL.revokeObjectURL(url);
+            }}
             title="Download the workflow as a JSON definition file"
             className="px-3 py-1 text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 rounded transition-colors"
           >
