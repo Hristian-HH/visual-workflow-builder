@@ -87,10 +87,36 @@ export default function App() {
     );
   }, [setNodes]);
 
-  const onConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges],
+  const clearValidation = useCallback(
+    () => setValidationResult({ valid: null, blockers: [], warnings: [] }),
+    [],
   );
+
+  const onConnect = useCallback((connection) => {
+    setEdges((eds) => addEdge(connection, eds));
+    clearValidation();
+  }, [setEdges, clearValidation]);
+
+  const handleNodesChange = useCallback((changes) => {
+    if (changes.some((c) => c.type === 'remove')) clearValidation();
+    onNodesChange(changes);
+  }, [onNodesChange, clearValidation]);
+
+  const handleEdgesChange = useCallback((changes) => {
+    if (changes.some((c) => c.type === 'remove')) clearValidation();
+    onEdgesChange(changes);
+  }, [onEdgesChange, clearValidation]);
+
+  const onDeleteNode = useCallback((nodeId, nodeType) => {
+    if (
+      (nodeType === 'start' || nodeType === 'end') &&
+      !window.confirm(`Delete the ${nodeType} node? This will break the workflow structure.`)
+    ) return;
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+    setSelectedNode(null);
+    clearValidation();
+  }, [setNodes, setEdges, clearValidation]);
 
   const onNodeClick = useCallback((_event, node) => {
     setSelectedNode(node);
@@ -341,8 +367,8 @@ export default function App() {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={handleEdgesChange}
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
@@ -357,7 +383,7 @@ export default function App() {
 
         {/* Right inspector */}
         <aside className="w-64 flex-shrink-0 bg-slate-800 border-l border-slate-700 overflow-y-auto">
-          <Inspector selectedNode={selectedNode} onChange={onInspectorChange} />
+          <Inspector selectedNode={selectedNode} onChange={onInspectorChange} onDelete={onDeleteNode} />
         </aside>
 
       </div>

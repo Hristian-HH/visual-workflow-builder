@@ -31,7 +31,7 @@ function Field({ label, helper, children }) {
   );
 }
 
-export default function Inspector({ selectedNode, onChange }) {
+export default function Inspector({ selectedNode, onChange, onDelete }) {
   if (!selectedNode) {
     return (
       <div className="h-full flex items-center justify-center p-4">
@@ -198,6 +198,17 @@ export default function Inspector({ selectedNode, onChange }) {
           {nodeDescriptions[type]}
         </p>
       )}
+
+      {/* ── Delete ── */}
+      <div className="mt-4 pt-4 border-t border-slate-700">
+        <button
+          onClick={() => onDelete(id, type)}
+          title="Remove this node and all its connections from the canvas"
+          className="w-full px-3 py-1.5 text-xs text-red-400 border border-red-800 hover:bg-red-950 rounded transition-colors"
+        >
+          Delete node
+        </button>
+      </div>
 
     </div>
   );
