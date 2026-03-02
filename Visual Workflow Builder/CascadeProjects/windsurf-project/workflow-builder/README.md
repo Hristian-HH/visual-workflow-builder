@@ -2,6 +2,8 @@
 
 A prototype drag-and-drop workflow builder for LeapXpert compliance workflows.
 
+**Live:** https://workflow-builder-six-pi.vercel.app
+
 **Stack:** Vite · React · React Flow · Tailwind CSS
 
 ---
