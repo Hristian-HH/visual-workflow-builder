@@ -3,7 +3,6 @@ import {
   ReactFlow,
   Background,
   Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -456,7 +455,6 @@ export default function App() {
           >
             <Background variant="dots" />
             <Controls />
-            <MiniMap />
           </ReactFlow>
           <HelpPanel />
         </div>
