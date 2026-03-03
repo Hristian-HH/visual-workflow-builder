@@ -12,7 +12,7 @@ import '@xyflow/react/dist/style.css';
 import HelpPanel from './components/HelpPanel';
 import CustomNode from './components/CustomNode';
 import Inspector from './components/Inspector';
-import { templateNodes, templateEdges } from './data/defaultTemplate';
+import { TEMPLATES } from './data/templates';
 import { validateWorkflow } from './utils/validate';
 import { buildSimulationSteps } from './utils/simulate';
 
@@ -62,9 +62,10 @@ function buildLogMessage({ nodeType, nodeLabel, properties: p, branchTaken }) {
 }
 
 export default function App() {
-  const [workflowName, setWorkflowName] = useState('WhatsApp DLP Compliance');
-  const [nodes, setNodes, onNodesChange] = useNodesState(templateNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(templateEdges);
+  const [workflowName, setWorkflowName] = useState('Untitled Workflow');
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [loadMenuOpen, setLoadMenuOpen] = useState(false);
   const [simulationState, setSimulationState] = useState({});
   const [selectedNode, setSelectedNode] = useState(null);
   const [validationResult, setValidationResult] = useState({ valid: null, blockers: [], warnings: [] });
@@ -171,14 +172,27 @@ export default function App() {
     runStep(0);
   }, [simRunning, nodes, edges, clearAllSimStatuses, setNodeSimStatus]);
 
+  const loadTemplate = useCallback((template) => {
+    clearTimeout(simTimerRef.current);
+    clearAllSimStatuses();
+    setSimRunning(false);
+    setSimLog([]);
+    setNodes(template.nodes);
+    setEdges(template.edges);
+    setSelectedNode(null);
+    setWorkflowName(template.name);
+    setValidationResult({ valid: null, blockers: [], warnings: [] });
+  }, [setNodes, setEdges, clearAllSimStatuses]);
+
   const onReset = useCallback(() => {
     clearTimeout(simTimerRef.current);
     clearAllSimStatuses();
     setSimRunning(false);
     setSimLog([]);
-    setNodes(templateNodes);
-    setEdges(templateEdges);
+    setNodes([]);
+    setEdges([]);
     setSelectedNode(null);
+    setWorkflowName('Untitled Workflow');
     setSimulationState({});
     setValidationResult({ valid: null, blockers: [], warnings: [] });
   }, [setNodes, setEdges, clearAllSimStatuses]);
@@ -268,9 +282,34 @@ export default function App() {
           >
             {simRunning ? '⏹ Stop' : '▶ Run Preview'}
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setLoadMenuOpen((o) => !o)}
+              title="Load a pre-built example workflow onto the canvas"
+              className="px-3 py-1 text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+            >
+              Load Example ▾
+            </button>
+            {loadMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setLoadMenuOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 w-60 bg-slate-800 border border-slate-600 rounded shadow-xl z-50">
+                  {TEMPLATES.map((t) => (
+                    <button
+                      key={t.name}
+                      onClick={() => { loadTemplate(t); setLoadMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-700 transition-colors first:rounded-t last:rounded-b"
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
           <button
             onClick={onReset}
-            title="Reset canvas to the default LeapXpert compliance template"
+            title="Clear the canvas and start a new blank workflow"
             className="px-3 py-1 text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 rounded transition-colors"
           >
             ↺ Reset
