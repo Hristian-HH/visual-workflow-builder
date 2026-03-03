@@ -254,6 +254,7 @@ export default function App() {
           value={workflowName}
           onChange={(e) => setWorkflowName(e.target.value)}
           className="bg-transparent border-none outline-none text-white font-semibold text-sm w-72"
+          title="Click to rename this workflow"
           aria-label="Workflow name"
         />
         <div className="flex gap-2">
