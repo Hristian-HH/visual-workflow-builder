@@ -71,23 +71,6 @@ export default function App() {
   const [validationResult, setValidationResult] = useState({ valid: null, blockers: [], warnings: [] });
   const canvasRef   = useRef(null);
   const importRef   = useRef(null);
-
-  const onImport = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const { name, nodes: n, edges: ed } = JSON.parse(ev.target.result);
-        if (!Array.isArray(n) || !Array.isArray(ed)) throw new Error();
-        loadTemplate({ name: name ?? file.name, nodes: n, edges: ed });
-      } catch {
-        window.alert('Invalid workflow JSON — could not import.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  }, [loadTemplate]);
   const [simRunning, setSimRunning] = useState(false);
   const [simLog, setSimLog] = useState([]);
   const simTimerRef = useRef(null);
@@ -201,6 +184,23 @@ export default function App() {
     setWorkflowName(template.name);
     setValidationResult({ valid: null, blockers: [], warnings: [] });
   }, [setNodes, setEdges, clearAllSimStatuses]);
+
+  const onImport = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const { name, nodes: n, edges: ed } = JSON.parse(ev.target.result);
+        if (!Array.isArray(n) || !Array.isArray(ed)) throw new Error();
+        loadTemplate({ name: name ?? file.name, nodes: n, edges: ed });
+      } catch {
+        window.alert('Invalid workflow JSON — could not import.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }, [loadTemplate]);
 
   const onReset = useCallback(() => {
     clearTimeout(simTimerRef.current);
