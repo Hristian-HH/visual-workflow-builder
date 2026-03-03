@@ -17,6 +17,7 @@ A prototype drag-and-drop workflow builder for LeapXpert compliance workflows.
 - **Validation** — checks for structural errors (disconnected nodes, missing branches) and field warnings; clears automatically when the canvas changes
 - **Run Preview simulation** — animated graph walk with per-node status rings and a timestamped log
 - **Export JSON** — downloads the current workflow as a named `.json` file
+- **Import JSON** — loads a previously exported `.json` file back onto the canvas
 - **3 example templates** — load via the **Load Example ▾** dropdown
 - **Collapsible help panel** — on-canvas usage guide
 
