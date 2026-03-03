@@ -69,7 +69,25 @@ export default function App() {
   const [simulationState, setSimulationState] = useState({});
   const [selectedNode, setSelectedNode] = useState(null);
   const [validationResult, setValidationResult] = useState({ valid: null, blockers: [], warnings: [] });
-  const canvasRef = useRef(null);
+  const canvasRef   = useRef(null);
+  const importRef   = useRef(null);
+
+  const onImport = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const { name, nodes: n, edges: ed } = JSON.parse(ev.target.result);
+        if (!Array.isArray(n) || !Array.isArray(ed)) throw new Error();
+        loadTemplate({ name: name ?? file.name, nodes: n, edges: ed });
+      } catch {
+        window.alert('Invalid workflow JSON — could not import.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }, [loadTemplate]);
   const [simRunning, setSimRunning] = useState(false);
   const [simLog, setSimLog] = useState([]);
   const simTimerRef = useRef(null);
@@ -330,6 +348,20 @@ export default function App() {
           >
             Export JSON
           </button>
+          <button
+            onClick={() => importRef.current.click()}
+            title="Load a previously exported workflow JSON file"
+            className="px-3 py-1 text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+          >
+            Import JSON
+          </button>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={onImport}
+          />
         </div>
       </header>
 
