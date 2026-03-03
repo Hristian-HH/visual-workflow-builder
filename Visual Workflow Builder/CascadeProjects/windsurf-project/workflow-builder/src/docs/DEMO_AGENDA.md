@@ -162,17 +162,53 @@ Extend the template system with 10–15 pre-built workflows covering WeChat, Tea
 
 ## 6. Q&A Buffer `[5 min]`
 
-**Q: Is this connected to real data?**
-No — this is a UX prototype. The simulation is a mock graph walk with no backend. The purpose is to validate the interaction model and the node vocabulary before investing in the real execution engine.
+---
+
+### About the prototype itself
+
+**Q: Is this connected to real data or a real system?**
+No — this is a UX prototype. The simulation is a mock graph walk with no backend, no auth, and no live policy evaluation. The purpose is to validate the interaction model, the node vocabulary, and the overall concept before investing in the execution engine. Every decision was made to maximise learning speed, not production readiness.
 
 **Q: How long did this take to build?**
-The full prototype — canvas, simulation, validation, three templates, export/import, deployment — was built and deployed in a single session. That speed is intentional: the goal was a working, testable artefact as fast as possible, not a production system.
+The full prototype — canvas, six node types, simulation engine, validation, three templates, export/import, bug fixes, and deployment to Vercel with GitHub auto-deploy — was built and shipped in a single session. That speed is intentional: a prototype's job is to be testable as fast as possible, not to be correct in every edge case.
 
-**Q: What happens if someone builds an invalid workflow and runs it?**
-The Run Preview button is disabled if there are validation blockers. If someone bypasses validation, the simulation walks as far as it can and stops gracefully when it reaches a dead end — no crash, no data loss.
+**Q: What bugs did you find and how did you handle them?**
+Four were caught: a temporal dead zone crash (wrong hook ordering), a ghost inspector after keyboard deletion, simulation status leaking into exported JSON, and the canvas not refitting after loading a template. All four were diagnosed and fixed. Finding and fixing your own bugs under time pressure is part of the process — the key is knowing where to look.
 
-**Q: Could this scale to more complex workflows — loops, parallel branches, subflows?**
-The current architecture supports linear and branching flows. Loops are guarded against by a cycle-detection visited set. Parallel branches and subflows would require extending the node type system and the simulation engine — both are additive changes, not rewrites.
+---
 
-**Q: What does the exported JSON look like — is it a standard format?**
-It is a plain JSON object with three keys: `name`, `nodes`, and `edges` — matching the React Flow schema. It is not yet mapped to a production workflow spec (e.g. BPMN), but the structure is clean enough to be the basis for one. Mapping to BPMN 2.0 would be a natural next step before engineering implementation.
+### Technical depth
+
+**Q: Why React Flow? What alternatives did you consider?**
+React Flow was the fastest path to a production-quality interactive canvas with handles, edges, drag-and-drop, and zoom — all solved problems. Alternatives like D3.js or a custom SVG canvas would give more control but add weeks of boilerplate. For a prototype validating a concept, React Flow was the right tradeoff. In production I'd evaluate whether to stay on it or build a leaner custom renderer depending on performance requirements at scale.
+
+**Q: How would you move this to production — what changes?**
+Three major additions: (1) a real execution engine that evaluates node logic against live message data instead of random branching, (2) a persistence layer — database, auth, and workflow versioning so teams can save, share, and audit changes, (3) a backend API that maps the JSON export to the actual rule engine LeapXpert uses. The frontend architecture is already clean enough to support this — all state is centralised, the JSON schema is stable, and the node system is extensible.
+
+**Q: How does the simulation engine work?**
+It's a graph walk — find the Start node, follow outgoing edges, resolve conditions randomly, push each visited node into a steps array, stop at End or when the next node is null or already visited. It's about 50 lines. Simple by design: the goal was to produce an ordered list of steps that the UI could animate, not to build a real execution engine.
+
+**Q: How would you handle multi-user collaboration — two compliance officers editing the same workflow?**
+The current architecture is single-user, in-memory. For multi-user I'd add operational transforms or CRDT-based conflict resolution (same approach Figma and Notion use), with a WebSocket layer for real-time sync and a locking model at the node level. The JSON schema is already granular enough to support node-level diffs. It's a significant addition but not a rearchitecture.
+
+**Q: What's your approach to testing this kind of UI?**
+For the simulation logic, pure unit tests — `buildSimulationSteps` takes nodes and edges and returns a deterministic array (except for condition branches, which are mockable). For the canvas interactions, Playwright or Cypress end-to-end tests covering the key flows: load template → validate → simulate → export → import. The validation logic is already fully unit-testable. I didn't write tests here because this was a prototype — but the functions are structured to make testing straightforward.
+
+---
+
+### Product and process
+
+**Q: How did you decide what to include and what to cut?**
+Every decision was filtered through one question: does this help validate the concept, or does it add complexity without learning? Backend, auth, persistence, real policy evaluation — all cut. Simulation, validation, export/import, three templates — all kept, because each one answers a specific product question: Can compliance teams express their logic visually? Can they catch errors before running? Can they share workflows with engineering? Each feature earned its place.
+
+**Q: How would you validate this with real compliance officers before building more?**
+Run structured sessions with three or four compliance officers at regulated enterprises. Give them a scenario ("design the workflow for a GDPR data subject request") and observe — do they understand the node types intuitively? Where do they get stuck? What vocabulary do they use that isn't reflected in the builder? Then iterate on the node types and inspector fields before touching the backend. The prototype already gives you something concrete to put in front of them.
+
+**Q: How does this compare to existing tools — Visio, Lucidchart, BPMN editors?**
+Those tools produce diagrams. This produces executable definitions. The distinction matters: a Visio flowchart has no schema, no validation, and no machine-readable output — it's documentation. This builder produces structured JSON that maps directly to a rule engine's input. The second key difference is domain specificity — the node types here (Rule Check, Approval, Archive) speak the compliance vocabulary, not generic flowchart shapes. Domain-specific beats generic for regulated users.
+
+**Q: What metrics would define success for this product in production?**
+Three tiers: (1) adoption — what percentage of compliance workflows are authored in the builder vs. written as tickets, (2) quality — reduction in workflow defects caught in production vs. caught at validation time, (3) speed — time from "we need a new policy" to "workflow is live and enforced." If those three numbers move in the right direction, the product is working.
+
+**Q: What would you do differently if you had more time?**
+User research first — I'd talk to two or three compliance officers before writing a single line of code to validate the node vocabulary and the mental model. I'd also write the simulation engine tests upfront rather than retrofitting them. And I'd have designed the JSON schema with BPMN compatibility in mind from the start, which would make the engineering handoff cleaner.

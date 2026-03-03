@@ -40,17 +40,32 @@
 
 ## Q&A
 
-**Real data?**
-No — mock simulation only. Validates the UX model before building the engine.
+**Real data / real system?**
+No backend, no auth, no live evaluation. Purpose: validate the UX model and node vocabulary before building the engine.
 
 **How long to build?**
-Full prototype built and deployed in a single session, intentionally.
+Full prototype — canvas, simulation, validation, 3 templates, export/import, deployment — in a single session.
 
-**Invalid workflow + Run Preview?**
-Button blocked by validation errors. If bypassed, simulation stops gracefully.
+**Bugs found?**
+Four: hook ordering crash (white screen), ghost inspector on keyboard delete, simulationStatus in export, no fitView on template load. All fixed.
 
-**Loops / parallel branches?**
-Additive changes to the node system and engine — not a rewrite.
+**Why React Flow, not custom canvas?**
+Handles, edges, drag-and-drop, zoom — all solved. Custom canvas adds weeks of boilerplate for zero extra learning.
 
-**Export format — standard?**
-Plain JSON (name, nodes, edges). Maps cleanly to BPMN 2.0 as a next step.
+**Production architecture?**
+Three additions: real execution engine (connect to DLP/AML APIs), persistence layer (DB + auth + versioning), backend API mapping JSON to rule engine.
+
+**How does the simulation engine work?**
+Graph walk from Start — follow edges, resolve conditions randomly, cycle guard via visited Set, returns ordered steps array. ~50 lines.
+
+**Multi-user collaboration?**
+CRDT or operational transforms + WebSocket layer + node-level locking. Significant addition, not a rearchitecture.
+
+**vs. Visio / Lucidchart / BPMN editors?**
+Those produce diagrams. This produces executable, validated, machine-readable definitions. Domain-specific node types beat generic shapes for compliance teams.
+
+**How to validate with real users?**
+Structured sessions with 3–4 compliance officers: give a scenario, observe where they get stuck, iterate on node types before touching the backend.
+
+**What would you do differently?**
+User research before writing code. Tests for the simulation engine upfront. JSON schema designed for BPMN compatibility from day one.
