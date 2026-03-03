@@ -164,44 +164,44 @@ Extend the template system with 10–15 pre-built workflows covering WeChat, Tea
 
 ---
 
-**Q: Is this connected to real data or a real system?**
+**[REAL DATA] Q: Is this connected to real data or a real system?**
 No — it's a prototype built to show how the tool would work, not to process real messages or enforce real policies. Think of it like a flight simulator: everything feels realistic, but nobody is actually flying. The goal was to validate whether the concept makes sense before investing in building the engine behind it.
 
-**Q: How long did this take to build?**
+**[BUILD TIME] Q: How long did this take to build?**
 The whole thing — canvas, three templates, simulation, validation, export/import, and deployment — was built and shipped in a single session. A prototype's job is to be testable as fast as possible, and a working demo in front of real people teaches you more than weeks of planning on a whiteboard.
 
-**Q: What bugs did you find and how did you handle them?**
+**[BUGS] Q: What bugs did you find and how did you handle them?**
 Four came up during testing: a crash on load, the inspector showing data for a node that had already been deleted, leftover simulation data leaking into exported files, and the canvas not recentring after loading a template. All four were caught and fixed. Finding your own bugs is part of the job — it means you're actually testing, not just building.
 
-**Q: Why this tech stack?**
+**[STACK] Q: Why this tech stack?**
 It was chosen entirely for speed — React, Vite, and Tailwind are tools that produce clean, maintainable output without slowing you down. None of them are exotic choices, which also matters if this becomes a real product: the next person who touches the codebase won't need to learn anything unfamiliar.
 
-**Q: Why React Flow specifically for the canvas?**
+**[REACT FLOW] Q: Why React Flow specifically for the canvas?**
 It solves everything you need for an interactive canvas — drag-and-drop, connections, handles, zooming — out of the box. Building that from scratch would have taken weeks and taught us nothing new about the product. For a prototype, the right tool is the one that gets you to testable fastest.
 
-**Q: How would you move this to production — what's missing?**
+**[PRODUCTION] Q: How would you move this to production — what's missing?**
 Three things: a real policy engine that evaluates nodes against live data instead of running randomly, a database so teams can save and version their workflows, and a connection to LeapXpert's existing systems. The front-end is already structured cleanly enough to support all of that without rebuilding from scratch.
 
-**Q: How does the simulation work?**
+**[SIMULATION] Q: How does the simulation work?**
 It walks through the workflow from Start to End, following the connections between nodes. At a decision point it picks a path at random so you can see both possible outcomes across runs. It's intentionally simple — the goal was to make the flow feel real and animated, not to build an actual execution system.
 
-**Q: How would you handle two people editing the same workflow at the same time?**
+**[MULTI-USER] Q: How would you handle two people editing the same workflow at the same time?**
 That's a genuinely hard problem that needs dedicated design time. The approach would be similar to how Google Docs handles it — syncing changes in real time and resolving conflicts when two people edit the same thing simultaneously. It's doable, but it's a separate workstream, not a quick addition.
 
-**Q: How did you decide what to build and what to cut?**
+**[SCOPE] Q: How did you decide what to build and what to cut?**
 Every feature had to answer a specific question about whether the concept works. Simulation answers "does it feel real enough to evaluate?" Validation answers "can teams catch their own mistakes?" Export answers "can this hand off to engineering cleanly?" Anything that didn't answer a question got cut.
 
-**Q: How would you validate this with real compliance officers?**
+**[VALIDATION] Q: How would you validate this with real compliance officers?**
 Put it in front of three or four of them with a real scenario — "design the workflow for a GDPR data subject request" — and watch without guiding. Not a survey, a working session. You learn more from watching where someone hesitates than from anything they tell you directly.
 
-**Q: How does this compare to tools like Visio or Lucidchart?**
+**[VS VISIO] Q: How does this compare to tools like Visio or Lucidchart?**
 Those tools make diagrams. This makes definitions — and the difference matters. A Visio flowchart has no validation and no machine-readable output; it's documentation that someone still has to interpret. This produces something structured that an engineering team can implement directly.
 
-**Q: What metrics would define success in production?**
+**[METRICS] Q: What metrics would define success in production?**
 Three: how many compliance workflows get built here instead of written as tickets, how many errors get caught before go-live instead of after, and how long it takes to turn a new policy into an enforced rule. If those move in the right direction, the tool is doing its job.
 
-**Q: What would you do differently if you had more time?**
+**[DIFFERENTLY] Q: What would you do differently if you had more time?**
 Talk to compliance officers before writing any code. A few conversations upfront would have told me whether the node types matched their vocabulary — which is the most important design question in the whole product. I'd also have designed the export format with an industry standard in mind from the start, to make the handoff to engineering cleaner.
 
-**Q: Walk me through the design decision you're most proud of.**
+**[PROUD OF] Q: Walk me through the design decision you're most proud of.**
 The blank canvas default — the app opens empty instead of loading a template automatically. It's a small thing, but it changes the entire mental model: you're here to build, not to view. Templates are one click away when you need a starting point, but the empty canvas signals that this is your tool. That kind of framing often gets decided by accident and never questioned — I made it a deliberate choice.
