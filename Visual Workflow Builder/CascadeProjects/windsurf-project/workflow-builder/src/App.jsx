@@ -69,8 +69,9 @@ export default function App() {
   const [simulationState, setSimulationState] = useState({});
   const [selectedNode, setSelectedNode] = useState(null);
   const [validationResult, setValidationResult] = useState({ valid: null, blockers: [], warnings: [] });
-  const canvasRef   = useRef(null);
-  const importRef   = useRef(null);
+  const canvasRef      = useRef(null);
+  const importRef      = useRef(null);
+  const reactFlowRef   = useRef(null);
   const [simRunning, setSimRunning] = useState(false);
   const [simLog, setSimLog] = useState([]);
   const simTimerRef = useRef(null);
@@ -100,7 +101,11 @@ export default function App() {
   }, [setEdges, clearValidation]);
 
   const handleNodesChange = useCallback((changes) => {
-    if (changes.some((c) => c.type === 'remove')) clearValidation();
+    const removed = changes.filter((c) => c.type === 'remove').map((c) => c.id);
+    if (removed.length > 0) {
+      clearValidation();
+      setSelectedNode((prev) => (prev && removed.includes(prev.id) ? null : prev));
+    }
     onNodesChange(changes);
   }, [onNodesChange, clearValidation]);
 
@@ -183,6 +188,7 @@ export default function App() {
     setSelectedNode(null);
     setWorkflowName(template.name);
     setValidationResult({ valid: null, blockers: [], warnings: [] });
+    setTimeout(() => reactFlowRef.current?.fitView({ padding: 0.15 }), 50);
   }, [setNodes, setEdges, clearAllSimStatuses]);
 
   const onImport = useCallback((e) => {
@@ -335,7 +341,8 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              const payload = JSON.stringify({ name: workflowName, nodes, edges }, null, 2);
+              const cleanNodes = nodes.map(({ data: { simulationStatus, ...data }, ...n }) => ({ ...n, data }));
+              const payload = JSON.stringify({ name: workflowName, nodes: cleanNodes, edges }, null, 2);
               const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
               Object.assign(document.createElement('a'), {
                 href: url,
@@ -442,6 +449,7 @@ export default function App() {
             onNodesChange={handleNodesChange}
             onEdgesChange={handleEdgesChange}
             onConnect={onConnect}
+            onInit={(instance) => { reactFlowRef.current = instance; }}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             fitView
