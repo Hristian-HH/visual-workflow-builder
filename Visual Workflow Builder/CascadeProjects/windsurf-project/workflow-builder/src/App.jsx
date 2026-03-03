@@ -452,6 +452,7 @@ export default function App() {
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             fitView
+            proOptions={{ hideAttribution: true }}
           >
             <Background variant="dots" />
             <Controls />
